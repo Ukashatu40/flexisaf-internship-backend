@@ -5,6 +5,9 @@ import StudentTable from './components/StudentTable';
 import StudentModal from './components/StudentModal';
 import Toast from './components/Toast';
 
+// Use environment variable for API base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 function ErrorBoundary({ children }) {
   return children;  // Simple fallback for now
 }
@@ -26,7 +29,7 @@ function App() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8080/students');
+      const response = await axios.get(`${API_BASE_URL}/students`);
       const studentList = response.data._embedded?.studentList || [];
       setStudents(studentList);
       setToast({ message: '', type: '' });
@@ -41,7 +44,7 @@ function App() {
   const fetchStudent = async (id) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8080/students/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/students/${id}`);
       setSelectedStudent(response.data);
       setToast({ message: '', type: '' });
     } catch (err) {
@@ -83,10 +86,10 @@ function App() {
     setLoading(true);
     try {
       if (isEditMode) {
-        await axios.put(`http://localhost:8080/students/${selectedStudent.id}`, formData);
+        await axios.put(`${API_BASE_URL}/students/${selectedStudent.id}`, formData);
         setToast({ message: 'Student updated successfully!', type: 'success' });
       } else {
-        await axios.post('http://localhost:8080/students', formData);
+        await axios.post(`${API_BASE_URL}/students`, formData);
         setToast({ message: 'Student created successfully!', type: 'success' });
       }
       fetchStudents();
@@ -103,7 +106,7 @@ function App() {
     if (window.confirm('Are you sure you want to delete this student?')) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:8080/students/${id}`);
+        await axios.delete(`${API_BASE_URL}/students/${id}`);
         setToast({ message: 'Student deleted successfully!', type: 'success' });
         fetchStudents();
       } catch (err) {
