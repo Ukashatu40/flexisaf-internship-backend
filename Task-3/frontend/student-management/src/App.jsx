@@ -5,23 +5,29 @@ import StudentTable from './components/StudentTable';
 import StudentModal from './components/StudentModal';
 import Toast from './components/Toast';
 
-// Use environment variable for API base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://flexisaf-student-backend.onrender.com';
 
 function ErrorBoundary({ children }) {
-  return children;  // Simple fallback for now
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    window.onerror = (msg, url, lineNo, columnNo, error) => {
+      setError(msg);
+      return false;
+    };
+  }, []);
+  if (error) return <div>Error: {error}</div>;
+  return children;
 }
 
 function App() {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [formData, setFormData] = useState({ name: '', department: '' });
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', department: '' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [toast, setToast] = useState({ message: '', type: '' });
   const [loading, setLoading] = useState(false);
 
-  // Fetch all students
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -32,15 +38,14 @@ function App() {
       const response = await axios.get(`${API_BASE_URL}/students`);
       const studentList = response.data._embedded?.studentList || [];
       setStudents(studentList);
-      setToast({ message: '', type: '' });
+      setToast({ message: 'Students loaded successfully', type: 'success' });
     } catch (err) {
-      console.error('Fetch error:', err);  // Log for debugging
-      setToast({ message: 'Failed to fetch students', type: 'error' });
+      console.error('Fetch error:', err);
+      setToast({ message: `Failed to fetch students: ${err.message}`, type: 'error' });
     }
     setLoading(false);
   };
 
-  // Fetch single student
   const fetchStudent = async (id) => {
     setLoading(true);
     try {
@@ -49,38 +54,34 @@ function App() {
       setToast({ message: '', type: '' });
     } catch (err) {
       console.error('Fetch student error:', err);
-      setToast({ message: `Failed to fetch student: ${err.response?.data || err.message}`, type: 'error' });
+      setToast({ message: `Failed to fetch student: ${err.message}`, type: 'error' });
     }
     setLoading(false);
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Open modal for creating or editing
   const openModal = (student = null) => {
     if (student) {
-      setFormData({ name: student.name, department: student.department });
+      setFormData({ firstName: student.firstName, lastName: student.lastName, department: student.department });
       setSelectedStudent(student);
       setIsEditMode(true);
     } else {
-      setFormData({ name: '', department: '' });
+      setFormData({ firstName: '', lastName: '', department: '' });
       setIsEditMode(false);
     }
     setIsModalOpen(true);
     setToast({ message: '', type: '' });
   };
 
-  // Close modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedStudent(null);
-    setFormData({ name: '', department: '' });
+    setFormData({ firstName: '', lastName: '', department: '' });
   };
 
-  // Create or update student
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -96,12 +97,11 @@ function App() {
       closeModal();
     } catch (err) {
       console.error('Submit error:', err);
-      setToast({ message: `Failed to ${isEditMode ? 'update' : 'create'} student: ${err.response?.data || err.message}`, type: 'error' });
+      setToast({ message: `Failed to ${isEditMode ? 'update' : 'create'} student: ${err.message}`, type: 'error' });
     }
     setLoading(false);
   };
 
-  // Delete student
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       setLoading(true);
@@ -111,7 +111,7 @@ function App() {
         fetchStudents();
       } catch (err) {
         console.error('Delete error:', err);
-        setToast({ message: `Failed to delete student: ${err.response?.data || err.message}`, type: 'error' });
+        setToast({ message: `Failed to delete student: ${err.message}`, type: 'error' });
       }
       setLoading(false);
     }
@@ -153,7 +153,8 @@ function App() {
               <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Student Details</h3>
                 <p><strong>ID:</strong> {selectedStudent.id}</p>
-                <p><strong>Name:</strong> {selectedStudent.name}</p>
+                <p><strong>First Name:</strong> {selectedStudent.firstName}</p>
+                <p><strong>Last Name:</strong> {selectedStudent.lastName}</p>
                 <p><strong>Department:</strong> {selectedStudent.department}</p>
                 <button
                   onClick={() => setSelectedStudent(null)}
