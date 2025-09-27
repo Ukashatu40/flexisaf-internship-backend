@@ -10,7 +10,8 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true
-  }
+  },
+  base: './', // <-- add this
 });
 
 // import { defineConfig } from 'vite'
