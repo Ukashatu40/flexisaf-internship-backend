@@ -8,15 +8,7 @@ import Toast from './components/Toast';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://flexisaf-student-backend.onrender.com';
 
 function ErrorBoundary({ children }) {
-  const [error, setError] = useState(null);
-  useEffect(() => {
-    window.onerror = (msg, url, lineNo, columnNo, error) => {
-      setError(msg);
-      return false;
-    };
-  }, []);
-  if (error) return <div>Error: {error}</div>;
-  return children;
+  return children; // Simple fallback for now
 }
 
 function App() {
@@ -27,6 +19,7 @@ function App() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [toast, setToast] = useState({ message: '', type: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -38,10 +31,12 @@ function App() {
       const response = await axios.get(`${API_BASE_URL}/students`);
       const studentList = response.data._embedded?.studentList || [];
       setStudents(studentList);
-      setToast({ message: 'Students loaded successfully', type: 'success' });
+      setToast({ message: '', type: '' });
+      setError(null);
     } catch (err) {
       console.error('Fetch error:', err);
-      setToast({ message: `Failed to fetch students: ${err.message}`, type: 'error' });
+      setError('Failed to load students. Check backend connection or CORS.');
+      setToast({ message: 'Failed to fetch students', type: 'error' });
     }
     setLoading(false);
   };
@@ -54,15 +49,17 @@ function App() {
       setToast({ message: '', type: '' });
     } catch (err) {
       console.error('Fetch student error:', err);
-      setToast({ message: `Failed to fetch student: ${err.message}`, type: 'error' });
+      setToast({ message: `Failed to fetch student: ${err.response?.data || err.message}`, type: 'error' });
     }
     setLoading(false);
   };
 
+  // Handle form input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Open modal for creating or editing
   const openModal = (student = null) => {
     if (student) {
       setFormData({ firstName: student.firstName, lastName: student.lastName, department: student.department });
@@ -76,12 +73,14 @@ function App() {
     setToast({ message: '', type: '' });
   };
 
+  // Close modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedStudent(null);
     setFormData({ firstName: '', lastName: '', department: '' });
   };
 
+  // Create or update student
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -97,11 +96,12 @@ function App() {
       closeModal();
     } catch (err) {
       console.error('Submit error:', err);
-      setToast({ message: `Failed to ${isEditMode ? 'update' : 'create'} student: ${err.message}`, type: 'error' });
+      setToast({ message: `Failed to ${isEditMode ? 'update' : 'create'} student: ${err.response?.data || err.message}`, type: 'error' });
     }
     setLoading(false);
   };
 
+  // Delete student
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       setLoading(true);
@@ -111,11 +111,28 @@ function App() {
         fetchStudents();
       } catch (err) {
         console.error('Delete error:', err);
-        setToast({ message: `Failed to delete student: ${err.message}`, type: 'error' });
+        setToast({ message: `Failed to delete student: ${err.response?.data || err.message}`, type: 'error' });
       }
       setLoading(false);
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-red-500 p-4 text-center">
+          <h1 className="text-2xl font-bold mb-2">Error Loading Application</h1>
+          <p>{error}</p>
+          <button
+            onClick={fetchStudents}
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>
