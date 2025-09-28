@@ -62,11 +62,17 @@ function App() {
   // Open modal for creating or editing
   const openModal = (student = null) => {
     if (student) {
-      setFormData({ firstName: student.firstName, lastName: student.lastName, department: student.department });
+      console.log('Editing student:', student);
+      setFormData({
+        firstName: student.firstName || '',
+        lastName: student.lastName || '',
+        department: student.department || '',
+        name: student.name || `${student.firstName} ${student.lastName}`.trim()
+      });
       setSelectedStudent(student);
       setIsEditMode(true);
     } else {
-      setFormData({ firstName: '', lastName: '', department: '' });
+      setFormData({ firstName: '', lastName: '', department: '', name: '' });
       setIsEditMode(false);
     }
     setIsModalOpen(true);
