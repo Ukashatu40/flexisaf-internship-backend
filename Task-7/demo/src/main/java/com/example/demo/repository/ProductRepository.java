@@ -1,4 +1,10 @@
 package com.example.demo.repository;
 
-public interface ProductRepository {
+import com.example.demo.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+// JpaRepository provides CRUD operations automatically
+public interface ProductRepository extends JpaRepository<Product, Long> {
 }
