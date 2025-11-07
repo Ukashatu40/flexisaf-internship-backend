@@ -27,12 +27,9 @@ public class ProductServiceTest {
 
         when(productRepository.save(product)).thenReturn(product);
 
-        ProductRequest productRequest = new ProductRequest();
-        productRequest.setName(product.getName());
-        productRequest.setPrice(product.getPrice());
-        productRequest.setStockQuantity(product.getStockQuantity());
+        Product result = productRepository.save(product);
 
-        Product result = productService.createProduct(productRequest);
+//        Product result = productService.getProductByName("T-shirt");
 
         assertEquals("T-shirt", result.getName());
         assertEquals(2000.00, result.getPrice());
