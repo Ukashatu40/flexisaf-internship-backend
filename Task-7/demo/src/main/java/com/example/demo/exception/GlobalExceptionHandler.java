@@ -12,7 +12,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // --- 1. Custom Exception Handling (Resource Not Found) ---
+    // 1. Custom Exception Handling (Resource Not Found) ---
     // Handles ResourceNotFoundException and returns HTTP 404
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
