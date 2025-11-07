@@ -28,6 +28,10 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    public Product getProductByName(String name){
+        return productRepository.findByName(name);
+    }
+
     // 3. POST (Create)
     public Product createProduct(ProductRequest request) {
         Product product = new Product(
