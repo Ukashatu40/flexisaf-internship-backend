@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 // JpaRepository provides CRUD operations automatically
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    Product findByName(String name);
 }
